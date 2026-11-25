@@ -6,7 +6,7 @@ from src.controllers.access import identity, reviewer
 from src.controllers.workbench import new_review
 from src.schemas.reviews import ReviewEntry, ReviewInput
 from src.schemas.runs import RunEntry
-from src.services import reviews, runs
+from src.services import evidence, reviews, runs
 from src.utils.serial import canonical_json
 
 router = APIRouter(prefix="/runs", tags=["Execution"])
@@ -43,6 +43,8 @@ def export(run_id: int):
         if run["status"] != JobState.DONE:
             raise HTTPException(409, "没有可导出的执行结果")
         run["review"] = reviews.get(db, run_id)
+        migration = evidence.describe(db, run_id)
+        run["migration"] = migration
     return Response(canonical_json(run), media_type="application/json", headers={
         "Content-Disposition": f"attachment; filename=evidence-{run_id}.json",
     })

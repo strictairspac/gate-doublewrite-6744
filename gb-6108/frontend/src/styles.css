@@ -96,6 +96,14 @@ td a[aria-current=true] { font-weight: 750; }
 .metrics div { border-top: .2rem solid var(--accent); background: var(--surface); padding: .78rem; min-width: 0; }
 .metrics dd { color: var(--accent); font: 700 1.55rem/1.25 var(--title-font); overflow-wrap: anywhere; }
 .evidence select { width: fit-content; max-width: 100%; }
+.panel-hint { color: var(--muted); font-size: .9rem; }
+.inline-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.inline-actions button { padding: .32rem .6rem; font-size: .85rem; }
+.state-migration-backfilling { color: var(--muted); }
+.state-migration-backfilled { color: var(--accent); }
+.state-migration-switched, .state-migration-reclaimed, .state-source-page { color: oklch(.42 .11 150); }
+.state-source-package { color: var(--muted); }
+.evidence-summary .status { margin-top: .5rem; }
 .signature { border-left: .2rem solid var(--accent); padding-left: .85rem; }
 .signature p { margin: .35rem 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) {

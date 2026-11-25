@@ -2,6 +2,7 @@ import { api } from "../api/workbench.js";
 import { errorText, field } from "../components/common/fields.js";
 import { empty, pageHeading, section } from "../components/common/panel.js";
 import { resultTable } from "../components/common/table.js";
+import { migrationPanel } from "../components/evidence/migrationPanel.js";
 import { submit } from "../hooks/submit.js";
 import { el } from "../utils/dom.js";
 import { cell, download, time } from "../utils/format.js";
@@ -17,6 +18,14 @@ function reviewForm(id, saved) {
 function signature(review) {
   return el("div", {"data-testid": "reviewed", class: "signature"},
     el("strong", {}, `已签署 · ${review.actor}`), el("p", {}, review.note), el("time", {}, time(review.created_at)));
+}
+
+function storageBadge(source) {
+  if (!source) return null;
+  return el("span", {
+    class: `status state-source-${source === "页存储" ? "page" : "package"}`,
+    "data-testid": "storage-source",
+  }, `本批读取：${source}`);
 }
 
 export async function evidencePage(config, user, route) {
@@ -45,13 +54,26 @@ export async function evidencePage(config, user, route) {
   const options = el("select", {"aria-label": "选择已完成的批次", onchange: event => {
     location.hash = `evidence/${event.target.value}`;
   }}, runs.map(item => el("option", {value: item.id, selected: item.id === run.id}, `#${item.id} ${item.case_title}`)));
+
+  // Re-render after every migration action so the page-level source badge and
+  // the per-row 存储位置 column reflect the storage currently authoritative.
+  const refresh = async () => {
+    const next = await evidencePage(config, user, route);
+    document.querySelector("#content").replaceChildren(next);
+  };
+  const migration = await migrationPanel(user.role === "operator", refresh);
+
   return el("div", {class: "page evidence"},
     pageHeading(config.modules[3], run.case_title, button),
     issue, options,
-    el("section", {class: "feature evidence-summary"}, el("div", {}, el("h2", {}, "批次判定"), el("p", {}, run.result.summary)),
+    el("section", {class: "feature evidence-summary"},
+      el("div", {}, el("h2", {}, "批次判定"), el("p", {}, run.result.summary),
+        storageBadge(run.storage_source)),
       el("details", {}, el("summary", {}, "证据摘要"), el("code", {}, run.digest))),
     el("dl", {class: "metrics"}, Object.entries(run.result.metrics).map(([label, value]) =>
       el("div", {}, el("dt", {}, label), el("dd", {}, cell(value))))),
-    section("业务结果明细", run.result.rows.length ? resultTable(run.result.rows) : empty("此批次无明细。")),
+    section("业务结果明细", run.result.rows.length ?
+      resultTable(run.result.rows) : empty("此批次无明细。")),
+    migration,
     section("复核签署", signing));
 }

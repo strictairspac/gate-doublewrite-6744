@@ -18,3 +18,14 @@ class RunEntry(BaseModel):
     result: dict | None
     failure: str | None
     digest: str | None
+    storage_source: str | None = None
+
+
+class MigrationEntry(BaseModel):
+    run_id: int
+    case_id: int | None = None
+    state: str
+    page_count: int
+    written_pages: int
+    source_digest: str
+    updated_at: int

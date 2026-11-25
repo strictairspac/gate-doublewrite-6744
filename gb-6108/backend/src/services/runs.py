@@ -7,7 +7,7 @@ from src.constants.job_state import JobState
 from src.domain.scenario import CONFIG
 from src.models.cases import cases
 from src.models.runs import runs
-from . import audit, cases as case_service
+from . import audit, cases as case_service, evidence
 
 
 def query():
@@ -18,11 +18,28 @@ def get(db, run_id):
     run = db.execute(query().where(runs.c.id == run_id)).mappings().first()
     if run is None:
         raise HTTPException(404, "执行批次不存在")
-    return dict(run)
+    run = dict(run)
+    # Serve evidence through the storage that is currently authoritative and
+    # tag each page with the source it was actually read from.
+    if run["status"] == JobState.DONE:
+        result, source = evidence.load_result(db, run_id)
+        run["result"] = evidence.tag_rows(result, source)
+        run["storage_source"] = source
+    else:
+        run["storage_source"] = None
+    return run
 
 
 def list_entries(db):
-    return [dict(row) for row in db.execute(query().order_by(runs.c.id.desc()).limit(100)).mappings()]
+    entries = [dict(row) for row in db.execute(query().order_by(runs.c.id.desc()).limit(100)).mappings()]
+    for entry in entries:
+        if entry["status"] == JobState.DONE:
+            result, source = evidence.load_result(db, entry["id"])
+            entry["result"] = evidence.tag_rows(result, source)
+            entry["storage_source"] = source
+        else:
+            entry["storage_source"] = None
+    return entries
 
 
 def enqueue(db, case_id, parameter, actor):
