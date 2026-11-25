@@ -1,0 +1,24 @@
+:root {
+  --paper: oklch(0.955 .018 235);
+  --surface: oklch(.982 .008 235);
+  --tint: oklch(.916 0.040 235);
+  --accent: oklch(0.44 0.096 235);
+  --on-accent: oklch(.985 .008 235);
+  --ink: oklch(.235 .037 235);
+  --muted: oklch(.42 .04 235);
+  --rule: oklch(.824 0.036 235);
+  --rail: oklch(0.21 0.056 235);
+  --rail-ink: oklch(.953 .015 235);
+  --rail-highlight: oklch(.34 0.060 235);
+  --signal: oklch(.46 .145 25);
+  --title-font: "Chivo", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+  --body-font: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --rail-width: clamp(13rem, 19vw, 19rem);
+  --login-ratio: 5fr;
+  --feature-ratio: 5fr;
+  --split-ratio: 4fr;
+  --radius: 1px;
+  --rail-size: 5px;
+  --cell-min: 7rem;
+}
+.login { background: var(--rail); } .login-story { color: var(--rail-ink); } .login-story :is(p,dt) { color: var(--rail-ink); } .diagram span { color: var(--ink); }
